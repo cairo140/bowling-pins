@@ -1,3 +1,4 @@
+#define DEBUG
 #include <iostream>
 #include <map>
 
@@ -5,12 +6,15 @@ using namespace std;
 using ClusterMap = map<int, int>;
 using WinnerMap = map<ClusterMap, bool>;
 
+static int op_counter = 0;
+
 bool can_force_loss(int from_cluster, const ClusterMap& map,
                     WinnerMap* winner_map);
 string map_to_string(const ClusterMap& map);
 void push_cluster(int size, ClusterMap* map);
 
 bool is_win(const ClusterMap& map, WinnerMap* winner_map) {
+  op_counter++;
   const auto& cached = winner_map->find(map);
   if (cached != winner_map->end()) {
 #ifdef DEBUG
@@ -22,10 +26,18 @@ bool is_win(const ClusterMap& map, WinnerMap* winner_map) {
   for (const auto& iter : map) {
     // If you can force any loss, you win.
     if (can_force_loss(iter.first, map, winner_map)) {
+#ifndef CACHE_DISABLED
+      cerr << "Saving win for " << map_to_string(map) << endl;
+      (*winner_map)[map] = true;
+#endif
       return true;
     }
   }
   // Otherwise, every move results in your opponent winning: you lose.
+#ifndef CACHE_DISABLED
+  cerr << "Saving loss for " << map_to_string(map) << endl;
+  (*winner_map)[map] = false;
+#endif
   return false;
 }
 
@@ -143,5 +155,8 @@ int main() {
 #endif
     cout << (is_win(map, &winner_map) ? "WIN" : "LOSE") << endl;
   }
+#ifdef DEBUG
+    cerr << "op_counter: " << to_string(op_counter) << endl;
+#endif
   return 0;
 }
