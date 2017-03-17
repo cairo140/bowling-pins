@@ -1,4 +1,3 @@
-#define DEBUG
 #include <iostream>
 #include <map>
 
@@ -26,16 +25,20 @@ bool is_win(const ClusterMap& map, WinnerMap* winner_map) {
   for (const auto& iter : map) {
     // If you can force any loss, you win.
     if (can_force_loss(iter.first, map, winner_map)) {
-#ifndef CACHE_DISABLED
+#ifdef DEBUG
       cerr << "Saving win for " << map_to_string(map) << endl;
+#endif
+#ifndef CACHE_DISABLED
       (*winner_map)[map] = true;
 #endif
       return true;
     }
   }
   // Otherwise, every move results in your opponent winning: you lose.
-#ifndef CACHE_DISABLED
+#ifdef DEBUG
   cerr << "Saving loss for " << map_to_string(map) << endl;
+#endif
+#ifndef CACHE_DISABLED
   (*winner_map)[map] = false;
 #endif
   return false;
